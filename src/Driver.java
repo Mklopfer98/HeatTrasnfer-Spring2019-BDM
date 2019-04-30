@@ -11,52 +11,79 @@ public class Driver {
 		TreeMap<Integer, ArrayList<Double>> Temp = new TreeMap<Integer, ArrayList<Double>>();
 		
 		/* All constants during the program */
-		final int ambT = 25;  // Ambient temperature
-		final int h_i = 6;  // Inside convection heat transfer coefficient
-		final int h_o = 9;  // Outside convection heat transfer coefficient
-		final double delta_x = 0.01;  // Node spacing
-		final int delta_t = 1;  // time step=1s
-		final double alpha = 0.36e-6;  // Thermal diffusion
-		final double rho_air = 1.28;  // Density of the air
-		final double cp_air = 1.006;  // Specific heat of the air
-		final double cp_food = 3.6;  // Specific heat of the food
-		final double k = 0.026;  // Wall conduction coefficient
-		final double tau = alpha*delta_t/((delta_x)*(delta_x));  // Time step method
+		final double kSteel = 16.3; // Conduction coefficient of the steel around the cup
+		final double kWater = 0.597; // Conduction coefficient of the water in the cup
+		final double spacing = 0.002; // Node spacing for the transient heat transfer
+		final double timeStep = 1.0; // Time spacing for the transient equations
+		final double emiss = 1.0; // Emisstivity of the vacuum surfaces
+		final double rhoWater = 999.0; // Density of the water
+		final double rhoSteel = 7900.0; // Density of the steel 304
+		final double cpWater = 4181.6; // Specific heat of the water
+		final double cpSteel = 500.0; // Specific heat of the steel 304
+		final double sigma = 5.67e-8; // Steffan-Boltzman constant for radiation
+		final double tau = 0.03575;  // Tau value of the water
 		
-		for (int i = 0; i < 5; ++i) {  // Initialize each temperature as 3
+		/* Outside temperature variables */
+		final double outTemp = 21.0; // Outside temperature for the room
+		final double outConv = 24.0; // Outside convection heat transfer coefficient
+		
+		for (int i = 0; i < 20; ++i) {  // Initialize each temperature as 3
 			Temp.put(i, new ArrayList<Double>());  // Add each new ArrayList to the TreeMap Temp
-			Temp.get(i).add(3.0);
+			Temp.get(i).add(5.0);
 		}
+		Temp.put(20, new ArrayList<Double>());
+		Temp.get(20).add(outTemp); // Add last node with independent starting temperature
 		
-		for (int i = 0; i < 21600; ++i) {  // iterated for 6 hrs, which is 21600s
+		for (int i = 0; i < 900; ++i) {  // iterated for 6 hrs, which is 21600s
 			
 			/* Get the last temperature from the previous iteration */
-			double T1 = Temp.get(0).get(i);
-			double T2 = Temp.get(1).get(i);
-			double T3 = Temp.get(2).get(i);
-			double T4 = Temp.get(3).get(i);
-			double T5 = Temp.get(4).get(i);
 			
+			double T1 = Temp.get(0).get(i); double T2 = Temp.get(1).get(i); double T3 = Temp.get(2).get(i); 
+			double T4 = Temp.get(3).get(i); double T5 = Temp.get(4).get(i); double T6 = Temp.get(5).get(i);
+			double T7 = Temp.get(6).get(i); double T8 = Temp.get(7).get(i); double T9 = Temp.get(8).get(i); 
+			double T10 = Temp.get(9).get(i); double T11 = Temp.get(10).get(i); double T12 = Temp.get(11).get(i);
+			double T13 = Temp.get(12).get(i); double T14 = Temp.get(13).get(i); double T15 = Temp.get(14).get(i); 
+			double T16 = Temp.get(15).get(i); double T17 = Temp.get(16).get(i); double T18 = Temp.get(17).get(i);
+			double T19 = Temp.get(18).get(i); 
+			double T20 = Temp.get(19).get(i); 
+			double T21 = Temp.get(20).get(i); 
+		
 			/* Calculate the new temperatures */
-			double node1 = (h_o*(ambT - T1)+(k*(T2-T1)/delta_x))*2*(delta_t/(1000*rho_air*delta_x*cp_air))+T1;
-			double node2 = tau*(T1+T3)+(1-2*tau)*T2;
-			double node3 = tau*(T2+T4)+(1-2*tau)*T3;
-			double node4 = (h_i*(T5-T4)+(k*(T3-T4)/delta_x))*2*(delta_t/(1000*rho_air*delta_x*cp_air))+T4;
-			double node5 = (((h_i*5.6135*(T4-T5)*delta_t)/1000)/(1.17*cp_air+10*cp_food))+T5;
+			Temp.get(0).add(tau*(2*T2) + (1-(2*tau))*T1);
+			Temp.get(1).add(tau*(T1+T3) + (1-(2*tau))*T2);
+			Temp.get(2).add(tau*(T2+T4) + (1-(2*tau))*T3);
+			Temp.get(3).add(tau*(T3+T5) + (1-(2*tau))*T4);
+			Temp.get(4).add(tau*(T4+T6) + (1-(2*tau))*T5);
+			Temp.get(5).add(tau*(T5+T7) + (1-(2*tau))*T6);
+			Temp.get(6).add(tau*(T6+T8) + (1-(2*tau))*T7);
+			Temp.get(7).add(tau*(T7+T9) + (1-(2*tau))*T8);
+			Temp.get(8).add(tau*(T8+T10) + (1-(2*tau))*T9);
+			Temp.get(9).add(tau*(T9+T11) + (1-(2*tau))*T10);
+			Temp.get(10).add(tau*(T10+T12) + (1-(2*tau))*T11);
+			Temp.get(11).add(tau*(T11+T13) + (1-(2*tau))*T12);
+			Temp.get(12).add(tau*(T12+T14) + (1-(2*tau))*T13);
+			Temp.get(13).add(tau*(T13+T15) + (1-(2*tau))*T14);
+			Temp.get(14).add(tau*(T14+T16) + (1-(2*tau))*T15);
+			Temp.get(15).add(tau*(T15+T17) + (1-(2*tau))*T16);
+			Temp.get(16).add(tau*(T16+T18) + (1-(2*tau))*T17);
+			 
+			Temp.get(17).add((timeStep*(kWater*((T18-T17)/(spacing)) + (kSteel*((T19-T18)/(spacing)))))/
+					((rhoWater*cpWater*(spacing/2) + rhoSteel*cpSteel*(spacing/2))) + T18);
 			
-			/* Access TreeMap to get the node ArrayList and add in the new temperature value */
-			Temp.get(0).add(node1);
-			Temp.get(1).add(node2);
-			Temp.get(2).add(node3);
-			Temp.get(3).add(node4);
-			Temp.get(4).add(node5);
+			Temp.get(18).add((timeStep*(emiss*sigma*(Math.pow(T19, 4) - Math.pow(T20, 4)) + kSteel*((T18-T19)/spacing)))/
+					((rhoSteel*cpSteel*(spacing/2))) + T19);
+			
+			Temp.get(19).add((timeStep*(emiss*sigma*(Math.pow(T19, 4) - Math.pow(T20, 4)) + kSteel*((T21-T20)/spacing)))/
+					((rhoSteel*cpSteel*(spacing/2))) + T20);
+			
+			Temp.get(20).add(21.0);
+		}
 		
-		} 
-		
-		int i = 21599; // Set position in matrix to print out temperature
+		int i = 10; // Set position in matrix to print out temperature
 		/* Iterate through last matrix entry and get the last temperature value */
-		for (int j = 0; j < 5; ++j) {
-			System.out.println(String.format("%.3f", Temp.get(j).get(i)));
+		for (int j = 0; j < 21; ++j) {
+			System.out.println(String.format("%.3f  " + j, Temp.get(j).get(i)));
 		}		
-	}
+		
+	}	
 }

@@ -18,7 +18,7 @@ public class Analysis {
 		final double cpWater = 4181.6; // Specific heat of the water
 		final double cpSteel = 500.0; // Specific heat of the steel 304
 		final double sigma = 5.67e-8; // Steffan-Boltzman constant for radiation
-		final double tau = 0.03575; // Tau value of the water
+		final double tau = 0.03575 * timeStep; // Tau value of the water
 
 		/* Outside temperature variables */
 		final double outTemp = 21.0; // Outside temperature for the room
@@ -76,16 +76,16 @@ public class Analysis {
 			Temp.get(15).add(tau * (T15 + T17) + (1 - (2 * tau)) * T16);
 			Temp.get(16).add(tau * (T16 + T18) + (1 - (2 * tau)) * T17);
 
-			Temp.get(17).add((timeStep * (kWater * ((T18 - T17) / (spacing)) + (kSteel * ((T19 - T18) / (spacing)))))
-					/ ((rhoWater * cpWater * (spacing / 2) + rhoSteel * cpSteel * (spacing / 2))) + T18);
+			Temp.get(17).add(timeStep * ((kWater * ((T18 - T17)/spacing) + (kSteel * ((T19 - T18)/spacing)) /
+					(rhoWater * cpWater * (spacing/2) + (rhoSteel * cpSteel * (spacing/2))))) + T18);
 
-			Temp.get(18).add((timeStep
+			Temp.get(18).add(((timeStep
 					* (emiss * sigma * (Math.pow(T20, 4) - Math.pow(T19, 4)) + kSteel * ((T18 - T19) / spacing)))
-					/ ((rhoSteel * cpSteel * (spacing / 2))) + T19);
+					/ ((rhoSteel * cpSteel * (spacing / 2)))) + T19);
 
-			Temp.get(19).add((timeStep
+			Temp.get(19).add(((timeStep
 					* (emiss * sigma * (Math.pow(T19, 4) - Math.pow(T20, 4)) + kSteel * ((T21 - T20) / spacing)))
-					/ ((rhoSteel * cpSteel * (spacing / 2))) + T20);
+					/ ((rhoSteel * cpSteel * (spacing / 2)))) + T20);
 
 			Temp.get(20).add((timeStep * (outConv * (outTemp - T21) + (kSteel * (T20 - T21) / spacing)))
 					/ (rhoSteel * cpSteel * (spacing / 2)) + T21);

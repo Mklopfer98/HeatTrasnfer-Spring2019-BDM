@@ -1,11 +1,13 @@
 
+import java.awt.Desktop;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.util.Scanner;
 
 public class Driver {
 
-	public final String fileName = "Data.csv"; // File name we will be writing to
+	public static final String fileName = "Data.csv"; // File name we will be writing to
 
 	/**
 	 * This is the driver of the program. All of the operations carried out will be
@@ -24,8 +26,9 @@ public class Driver {
 		Data.analyze(iterate); // Calculate the results
 
 		try {
-
-			BufferedWriter bw = new BufferedWriter(new FileWriter("src/Data.csv"));
+			
+			File file = new File(fileName); // New file object Java will write to
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file)); // Open up the file to write to
 
 			int i = 0; // i value
 			while (i < iterate) {
@@ -33,9 +36,10 @@ public class Driver {
 				String line = Data.getArrayLine(i, Data.Temp);
 				bw.write(line);
 				bw.newLine();
-				i += 240;
+				i += 10;
 			}
-			bw.close();
+			Desktop.getDesktop().open(file); // Open the file
+			bw.close(); // Close the writer
 
 		} catch (Exception e) { // Catch the error thrown by the program
 

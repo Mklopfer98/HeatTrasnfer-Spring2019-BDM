@@ -4,36 +4,40 @@ import java.util.TreeMap;
 public class Analysis {
 
 	public TreeMap<Integer, ArrayList<Double>> Temp = new TreeMap<Integer, ArrayList<Double>>();
+	public final double outTemp = -15.0; // Outside temperature
+	public final double inTemp = 88.0; // Inside temperature
 
 	public void analyze(int iterate) {
 
 		/* All constants during the program */
 		final double kSteel = 16.3; // Conduction coefficient of the steel around the cup
 		final double kWater = 0.597; // Conduction coefficient of the water in the cup
+		final double kInsu = 0.034; // Conduction coefficient of the insulation
 		final double spacing = 0.002; // Node spacing for the transient heat transfer
 		final double timeStep = 0.25; // Time spacing for the transient equations
-		final double emiss = 1.0; // Emisstivity of the vacuum surfaces
 		final double rhoWater = 999.0; // Density of the water
 		final double rhoSteel = 7900.0; // Density of the steel 304
+		final double rhoInsu = 15.0; // Density of the insulation foam
 		final double cpWater = 4181.6; // Specific heat of the water
 		final double cpSteel = 500.0; // Specific heat of the steel 304
-		final double sigma = 5.67e-8; // Steffan-Boltzman constant for radiation
+		final double cpInsu = 1300.0; // Specific heat of the insulation
 		final double tau = 0.03575 * timeStep; // Tau value of the water
 
 		/* Outside temperature variables */
-		final double outTemp = 21.0; // Outside temperature for the room
 		final double outConv = 24.0; // Outside convection heat transfer coefficient
 
-		for (int i = 0; i < 20; ++i) { // Initialize each temperature as 5
+		for (int i = 0; i < 17; ++i) { // Initialize each temperature as 5
 			Temp.put(i, new ArrayList<Double>()); // Add each new ArrayList to the TreeMap Temp
-			Temp.get(i).add(5.0);
+			Temp.get(i).add(inTemp);
 		}
 
-		Temp.put(20, new ArrayList<Double>()); // Add the last node
-		Temp.get(20).add(21.0); // Add last node with independent starting temperature
+		for (int i = 17; i < 21; ++i) {
+			Temp.put(i, new ArrayList<Double>()); // Add the last node
+			Temp.get(i).add(outTemp); // Add last node with independent starting temperature
+		}
 
 		for (int i = 0; i < iterate; ++i) { // Iterate through the time step this number of times: time = (i * timeStep)
-
+			
 			/* Get the last temperature from the previous iteration */
 			double T1 = Temp.get(0).get(i);
 			double T2 = Temp.get(1).get(i);
@@ -76,19 +80,25 @@ public class Analysis {
 			Temp.get(15).add(tau * (T15 + T17) + (1 - (2 * tau)) * T16);
 			Temp.get(16).add(tau * (T16 + T18) + (1 - (2 * tau)) * T17);
 
-			Temp.get(17).add(timeStep * ((kWater * ((T18 - T17)/spacing) + (kSteel * ((T19 - T18)/spacing)) /
-					(rhoWater * cpWater * (spacing/2) + (rhoSteel * cpSteel * (spacing/2))))) + T18);
+			Temp.get(17).add(((timeStep * ((kSteel * ((T19 - T18) / spacing)) + (kWater * ((T17 - T18) / spacing)))
+					/ ((rhoWater * cpWater * (spacing / 2)) + (rhoSteel * cpSteel * (spacing / 2))))) + T18);
 
-			Temp.get(18).add(((timeStep
-					* (emiss * sigma * (Math.pow(T20, 4) - Math.pow(T19, 4)) + kSteel * ((T18 - T19) / spacing)))
-					/ ((rhoSteel * cpSteel * (spacing / 2)))) + T19);
+			Temp.get(18).add(((timeStep * ((kInsu * ((T20 - T19) / spacing)) + (kSteel * ((T18 - T19) / spacing)))
+					/ ((rhoInsu * cpInsu * (spacing / 2)) + (rhoSteel * cpSteel * (spacing / 2))))) + T19);
 
-			Temp.get(19).add(((timeStep
-					* (emiss * sigma * (Math.pow(T19, 4) - Math.pow(T20, 4)) + kSteel * ((T21 - T20) / spacing)))
-					/ ((rhoSteel * cpSteel * (spacing / 2)))) + T20);
+			Temp.get(19).add(((timeStep * ((kSteel * ((T21 - T20) / spacing)) + (kInsu * ((T19 - T20) / spacing)))
+					/ ((rhoInsu * cpInsu * (spacing / 2)) + (rhoSteel * cpSteel * (spacing / 2))))) + T20);
 
-			Temp.get(20).add((timeStep * (outConv * (outTemp - T21) + (kSteel * (T20 - T21) / spacing)))
-					/ (rhoSteel * cpSteel * (spacing / 2)) + T21);
+			double conv = (outConv * (outTemp - T21));
+			double cond3 = (kSteel * ((T20 - T21) / spacing));
+			double denom3 = (rhoSteel * cpSteel * (spacing / 2));
+
+			Temp.get(20).add((((timeStep * (conv + cond3)) / denom3)) + T21);
+			
+			if (checkSteadyState(i)) {
+				break; // Stop the iterations once the system has reached steady state
+			}
+
 		}
 	}
 
@@ -109,6 +119,21 @@ public class Analysis {
 		tempLinear += String.format("%d", i); // Add the iteration time to the back of the line
 		return tempLinear; // Return the temperature nodes
 	}
-	
-	
+
+	/** This method will return to us on the console if the temperature within side the cup has reached 
+	 *  steady state or not.
+	 * 
+	 * @param i is the number of iterations in the program
+	 * @return boolean value if the system has reached steady state or not
+	 */
+	public boolean checkSteadyState(int i) {
+
+		if ((Math.abs(Temp.get(0).get(i) - outTemp)) < 0.5) {
+			System.out.println(String.format("After %d number of iterations, our system has reached SS.\n", i));
+			return true; // Tell the program this state has been reached
+		} else {
+			return false; // If it is not steady state continue the program
+		}
+
+	}
 }

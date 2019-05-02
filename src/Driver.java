@@ -31,12 +31,12 @@ public class Driver {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file)); // Open up the file to write to
 
 			int i = 0; // i value
-			while (i < iterate) {
+			while (i < Data.Temp.get(0).size()) { // After the program runs, print it to the excel file
 				
 				String line = Data.getArrayLine(i, Data.Temp);
 				bw.write(line);
 				bw.newLine();
-				i += 10;
+				i += 14400; // Every hour
 			}
 			Desktop.getDesktop().open(file); // Open the file
 			bw.close(); // Close the writer

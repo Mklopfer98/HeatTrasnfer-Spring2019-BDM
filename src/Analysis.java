@@ -4,8 +4,8 @@ import java.util.TreeMap;
 public class Analysis {
 
 	public TreeMap<Integer, ArrayList<Double>> Temp = new TreeMap<Integer, ArrayList<Double>>();
-	public final double outTemp = -15.0; // Outside temperature
-	public final double inTemp = 88.0; // Inside temperature
+	public final double outTemp = 21; // Outside temperature
+	public final double inTemp = 5.0; // Inside temperature
 
 	public void analyze(int iterate) {
 
@@ -37,7 +37,7 @@ public class Analysis {
 		}
 
 		for (int i = 0; i < iterate; ++i) { // Iterate through the time step this number of times: time = (i * timeStep)
-			
+
 			/* Get the last temperature from the previous iteration */
 			double T1 = Temp.get(0).get(i);
 			double T2 = Temp.get(1).get(i);
@@ -89,12 +89,9 @@ public class Analysis {
 			Temp.get(19).add(((timeStep * ((kSteel * ((T21 - T20) / spacing)) + (kInsu * ((T19 - T20) / spacing)))
 					/ ((rhoInsu * cpInsu * (spacing / 2)) + (rhoSteel * cpSteel * (spacing / 2))))) + T20);
 
-			double conv = (outConv * (outTemp - T21));
-			double cond3 = (kSteel * ((T20 - T21) / spacing));
-			double denom3 = (rhoSteel * cpSteel * (spacing / 2));
+			Temp.get(20).add((((timeStep * ((outConv * (outTemp - T21)) + (kSteel * ((T20 - T21) / spacing))))
+					/ (rhoSteel * cpSteel * (spacing / 2)))) + T21);
 
-			Temp.get(20).add((((timeStep * (conv + cond3)) / denom3)) + T21);
-			
 			if (checkSteadyState(i)) {
 				break; // Stop the iterations once the system has reached steady state
 			}
@@ -120,8 +117,9 @@ public class Analysis {
 		return tempLinear; // Return the temperature nodes
 	}
 
-	/** This method will return to us on the console if the temperature within side the cup has reached 
-	 *  steady state or not.
+	/**
+	 * This method will return to us on the console if the temperature within side
+	 * the cup has reached steady state or not.
 	 * 
 	 * @param i is the number of iterations in the program
 	 * @return boolean value if the system has reached steady state or not
